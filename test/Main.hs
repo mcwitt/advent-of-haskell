@@ -1,14 +1,20 @@
-{-# LANGUAGE TemplateHaskell #-}
-
 module Main where
 
-import Hedgehog
-import Hedgehog.Main
-import AOC
-
-prop_test :: Property
-prop_test = property $ do
-  doAOC === "AOC"
+import AOC.Y2015.D01.Tests
+import AOC.Y2015.D02.Tests
+import AOC.Y2015.D03.Tests
+import AOC.Y2015.D04.Tests
+import AOC.Y2015.D06.Tests
+import Test.Tasty
 
 main :: IO ()
-main = defaultMain [checkParallel $$(discover)]
+main =
+  defaultMain $
+    testGroup
+      "Tests"
+      [ AOC.Y2015.D01.Tests.tests,
+        AOC.Y2015.D02.Tests.tests,
+        AOC.Y2015.D03.Tests.tests,
+        AOC.Y2015.D04.Tests.tests,
+        AOC.Y2015.D06.Tests.tests
+      ]
