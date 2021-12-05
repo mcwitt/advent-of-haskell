@@ -1,5 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module AOC.Y2021.D05 where
@@ -9,39 +7,45 @@ import qualified AOC.Solution as S
 import Data.Attoparsec.ByteString.Char8 (decimal, endOfLine, parseOnly, sepBy)
 import Data.ByteString (ByteString)
 import qualified Data.Map as Map
-import Linear.V2
+import Linear.V2 (V2 (..))
 
 type Point = V2 Int
 
-data Line = L Point Point deriving (Show)
+data LineSegment = LS Point Point deriving (Show)
 
-parseInput :: ByteString -> [Line]
+parseInput :: ByteString -> [LineSegment]
 parseInput s = let Right r = parseOnly input s in r
   where
     input = line `sepBy` endOfLine
-    line = L <$> v2 <* " -> " <*> v2
+    line = LS <$> v2 <* " -> " <*> v2
     v2 = V2 <$> decimal <* "," <*> decimal
 
-solve1 :: [Line] -> Int
+solve1 :: [LineSegment] -> Int
 solve1 ls =
-  let ps = filter (\(L (V2 x1 y1) (V2 x2 y2)) -> x1 == x2 || y1 == y2) ls >>= points
+  let ps = filter notDiagonal ls >>= points
       diagram = Map.fromListWith (+) $ zip ps $ repeat 1
    in count (>= 2) $ Map.elems diagram
-
-points :: Line -> [Point]
-points (L (V2 x1 y1) (V2 x2 y2))
-  | x1 == x2 = [V2 x1 y | y <- range y1 y2]
-  | y1 == y2 = [V2 x y1 | x <- range x1 x2]
-  | otherwise = [V2 x y | (x, y) <- zip (range x1 x2) (range y1 y2)]
   where
-    range x y =
-      let ival = [min x y .. max x y]
-       in if x < y then ival else reverse ival
+    notDiagonal (LS (V2 x1 y1) (V2 x2 y2)) = x1 == x2 || y1 == y2
+
+points :: LineSegment -> [Point]
+points (LS (V2 x1 y1) (V2 x2 y2)) =
+  [V2 x y | (x, y) <- zipLongest x1 y1 (points1 x1 x2) (points1 y1 y2)]
+  where
+    points1 i f = if f - i > 0 then [i .. f] else reverse [f .. i]
+
+zipLongest :: a -> b -> [a] -> [b] -> [(a, b)]
+zipLongest defX defY = go
+  where
+    go [] [] = []
+    go (x : xs) [] = (x, defY) : go xs []
+    go [] (y : ys) = (defX, y) : go [] ys
+    go (x : xs) (y : ys) = (x, y) : go xs ys
 
 count :: Foldable f => (a -> Bool) -> f a -> Int
 count p = foldr (\x z -> if p x then z + 1 else z) 0
 
-solve2 :: [Line] -> Int
+solve2 :: [LineSegment] -> Int
 solve2 ls =
   let ps = ls >>= points
       diagram = Map.fromListWith (+) $ zip ps $ repeat 1
