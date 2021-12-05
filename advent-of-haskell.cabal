@@ -29,6 +29,7 @@ library
     , base16-bytestring
     , bytestring
     , containers
+    , linear
     , cryptohash-md5
     , primitive
     , vector
