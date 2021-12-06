@@ -18,30 +18,27 @@ parseInput s = let Right r = P.parseOnly input s in r
     input = P.decimal `P.sepBy` ","
 
 solve1 :: [Int] -> Int
-solve1 = length . (!! 80) . iterate step
+solve1 = solve 80
 
-step :: [Int] -> [Int]
-step ts =
-  let (countNew, ts') = foldl go (0, []) ts
-   in ts' ++ replicate countNew 8
-  where
-    go (c, ts') t = if t == 0 then (c + 1, 6 : ts') else (c, t - 1 : ts')
-
-solve2 :: [Int] -> Int
-solve2 =
+solve :: Int -> [Int] -> Int
+solve gen =
   getSum
     . fold
-    . (!! 256)
-    . iterate step2
+    . (!! gen)
+    . iterate step
     . foldMap (`IntMap.singleton` Sum 1)
 
-step2 :: MonoidalIntMap (Sum Int) -> MonoidalIntMap (Sum Int)
-step2 = foldMap go . IntMap.toList
+step :: MonoidalIntMap (Sum Int) -> MonoidalIntMap (Sum Int)
+step = foldMap go . IntMap.toList
   where
     go = \case
-      (0, Sum n) -> IntMap.fromList [(8, Sum n), (6, Sum n)]
-      (t, Sum n) -> IntMap.singleton (t - 1) (Sum n)
+      (0, n) -> IntMap.fromList [(8, n), (6, n)]
+      (t, n) -> IntMap.singleton (t - 1) n
 
+solve2 :: [Int] -> Int
+solve2 = solve 256
+
+solution :: Solution [Int] Int Int
 solution =
   Solution
     { year = Year 2021,
