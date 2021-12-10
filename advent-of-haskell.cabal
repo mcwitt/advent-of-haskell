@@ -22,6 +22,7 @@ library
     AOC.Y2015.D05
     AOC.Y2015.D06
     AOC.Y2021.D03
+    AOC.Y2021.D09
 
   ghc-options:      -Wall -fno-warn-name-shadowing
   build-depends:
