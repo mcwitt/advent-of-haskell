@@ -23,6 +23,7 @@ library
     AOC.Y2015.D06
     AOC.Y2021.D03
     AOC.Y2021.D09
+    AOC.Y2021.D11
 
   ghc-options:      -Wall -fno-warn-name-shadowing
   build-depends:
@@ -33,6 +34,7 @@ library
     , containers
     , linear
     , monoidal-containers
+    , mtl
     , cryptohash-md5
     , primitive
     , vector
@@ -60,3 +62,4 @@ test-suite advent-of-haskell-tests
     , bytestring
     , tasty
     , tasty-hunit
+    , raw-strings-qq
