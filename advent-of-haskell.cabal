@@ -38,6 +38,7 @@ library
     , cryptohash-md5
     , primitive
     , raw-strings-qq
+    , recursion-schemes
     , vector
 
   other-modules:    Paths_advent_of_haskell
