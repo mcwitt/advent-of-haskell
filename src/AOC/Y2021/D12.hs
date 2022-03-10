@@ -15,6 +15,7 @@ import Data.Char (isLower, isUpper, toLower, toUpper)
 import Data.Functor.Base (TreeF (..))
 import Data.Functor.Foldable (Recursive (cata))
 import qualified Data.Map as Map
+import Data.Set (Set)
 import qualified Data.Set as Set
 import Data.Tree (Tree (Node))
 
@@ -67,22 +68,24 @@ paths = cata go
     go (NodeF x ns) = [x : p | ps <- ns, p <- ps]
 
 prune :: Tree Cave -> Tree Cave
-prune = go Set.empty
+prune = flip (cata alg) Set.empty
   where
-    go visited (Node x ns) = case x of
-      Big _ -> Node x [go visited n | n <- ns]
-      Start | Set.notMember x visited -> Node x [go (Set.insert x visited) n | n <- ns]
-      Small _ | Set.notMember x visited -> Node x [go (Set.insert x visited) n | n <- ns]
+    alg :: TreeF Cave (Set Cave -> Tree Cave) -> Set Cave -> Tree Cave
+    alg (NodeF x fs) = \vs -> case x of
+      Big _ -> Node x [f vs | f <- fs]
+      Start | Set.notMember x vs -> Node x [f (Set.insert x vs) | f <- fs]
+      Small _ | Set.notMember x vs -> Node x [f (Set.insert x vs) | f <- fs]
       _ -> Node x []
 
 prune2 :: Tree Cave -> Tree Cave
-prune2 = go Set.empty True
+prune2 = flip (cata alg) (Set.empty, True)
   where
-    go visited canRevisit (Node x ns) = case x of
-      Big _ -> Node x [go visited canRevisit n | n <- ns]
-      Start | Set.notMember x visited -> Node x [go (Set.insert x visited) canRevisit n | n <- ns]
-      Small _ | Set.notMember x visited -> Node x [go (Set.insert x visited) canRevisit n | n <- ns]
-      Small _ | canRevisit -> Node x [go visited False n | n <- ns]
+    alg :: TreeF Cave ((Set Cave, Bool) -> Tree Cave) -> (Set Cave, Bool) -> Tree Cave
+    alg (NodeF x fs) = \(vs, canRevisit) -> case x of
+      Big _ -> Node x [f (vs, canRevisit) | f <- fs]
+      Start | Set.notMember x vs -> Node x [f (Set.insert x vs, canRevisit) | f <- fs]
+      Small _ | Set.notMember x vs -> Node x [f (Set.insert x vs, canRevisit) | f <- fs]
+      Small _ | canRevisit -> Node x [f (vs, False) | f <- fs]
       _ -> Node x []
 
 solve1 :: [Passage] -> Int
