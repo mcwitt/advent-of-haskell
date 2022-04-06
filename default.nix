@@ -22,6 +22,7 @@ let
     ];
     buildInputs = [
       myHaskellPackages.haskell-language-server
+      pkgs.haskellPackages.cabal-fmt
       pkgs.haskellPackages.cabal-install
       pkgs.haskellPackages.ghcid
       pkgs.haskellPackages.ormolu
